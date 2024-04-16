@@ -1,6 +1,6 @@
 # Controlling Relays from Go
 
-This pure Go implementation allows one to control the outputs off the [Waveshare Pico Relay B](https://www.waveshare.com/wiki/Pico-Relay-B)
+This TinyGo implementation allows one to control the outputs off the [Waveshare Pico Relay B](https://www.waveshare.com/wiki/Pico-Relay-B)
 
 ![Waveshare Pico Relay B](doc/assets/waveshare-pico-relay-b.jpg)
 
@@ -19,6 +19,11 @@ It looks like flashing from the dev Container is not supported, so I build the b
 ```
 $ tinygo build -size short -o firmware.uf2 -target=pico ./firmware
 ```
+
+## Firmware
+
+The CLI can be found in the separate [norn cli](https://github.com/nornforge/norn) project
+
 
 ## License
 
