@@ -10,7 +10,8 @@ import (
 	"github.com/nornforge/norn/pkg/norn"
 )
 
-var Version = "v0.0.1"
+// The version to be injected by CI/CD
+var Version string // This needs to be empty in order be overwritten by  ldflags
 
 func readFromSerial(ch chan<- norn.Command) {
 	reader := bufio.NewReader(os.Stdin)
@@ -71,6 +72,9 @@ func main() {
 			}
 			fmt.Print(string(res.Marshal()))
 		case norn.Version:
+			if Version == "" {
+				Version = "v0.0.0"
+			}
 			res := norn.Response{
 				Success: true,
 				Message: fmt.Sprintf("%s", Version),
