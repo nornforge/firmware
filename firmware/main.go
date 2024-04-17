@@ -10,7 +10,7 @@ import (
 	"github.com/nornforge/norn/pkg/norn"
 )
 
-const Version = "v0.0.1"
+var Version = "v0.0.1"
 
 func readFromSerial(ch chan<- norn.Command) {
 	reader := bufio.NewReader(os.Stdin)
