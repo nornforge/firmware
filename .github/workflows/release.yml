@@ -33,7 +33,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install coreutils
-          sha256sum firmware_pico.uf2 > checksums.txt
+          sha256sum "norn-firmware_pico_${{ github.ref_name }}.uf2" > checksums.txt
       - name: 🎉 Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
