@@ -23,7 +23,7 @@ jobs:
           tinygo-version: '0.31.2'
           install-binaryen: 'false'
       - name: 👷 Build
-        run: tinygo build -size full -o firmware_pico.uf2 -target=pico ./...
+        run: tinygo build -size full -o firmware_pico.uf2 -target=pico -ldflags="-X 'main.Version=${{ github.ref_name }}'" ./...
       - name: 📚 Changelog
         run: go install github.com/goreleaser/chglog/cmd/chglog@latest
         run: chglog init

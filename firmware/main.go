@@ -10,7 +10,7 @@ import (
 	"github.com/nornforge/norn/pkg/norn"
 )
 
-const version = "v0.0.1"
+const Version = "v0.0.1"
 
 func readFromSerial(ch chan<- norn.Command) {
 	reader := bufio.NewReader(os.Stdin)
@@ -73,7 +73,7 @@ func main() {
 		case norn.Version:
 			res := norn.Response{
 				Success: true,
-				Message: fmt.Sprintf("%s", version),
+				Message: fmt.Sprintf("%s", Version),
 			}
 			fmt.Print(string(res.Marshal()))
 		case norn.Bootloader:
