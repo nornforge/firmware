@@ -25,9 +25,10 @@ jobs:
       - name: 👷 Build
         run: tinygo build -size full -o firmware_pico.uf2 -target=pico -ldflags="-X 'main.Version=${{ github.ref_name }}'" ./...
       - name: 📚 Changelog
-        - run: go install github.com/goreleaser/chglog/cmd/chglog@latest
-        - run: chglog init
-        - run: chglog format --template release ${{ github.workspace }}-CHANGELOG.txt
+        run: |
+          go install github.com/goreleaser/chglog/cmd/chglog@latest
+          chglog init
+          chglog format --template release ${{ github.workspace }}-CHANGELOG.txt
       - name: 🎉 Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
