@@ -28,7 +28,7 @@ jobs:
         run: |
           go install github.com/goreleaser/chglog/cmd/chglog@latest
           chglog init
-          chglog format --template release ${{ github.workspace }}-CHANGELOG.txt
+          chglog format --template release > ${{ github.workspace }}-CHANGELOG.txt
       - name: 🎉 Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
