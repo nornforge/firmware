@@ -7,14 +7,14 @@ on:
       - '*'
 
 jobs:
-  goreleaser:
+  release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: 🚚 Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Set up Go
+      - name: 🔧 Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: 1.22
@@ -22,13 +22,18 @@ jobs:
         with:
           tinygo-version: '0.31.2'
           install-binaryen: 'false'
-      - name: Build
+      - name: 👷 Build
         run: tinygo build -size full -o firmware_pico.uf2 -target=pico ./...
-
-      - name: Release
+      - name: 📚 Changelog
+        run: go install github.com/goreleaser/chglog/cmd/chglog@latest
+        run: chglog init
+        run: chglog format --template release ${{ github.workspace }}-CHANGELOG.txt
+      - name: 🎉 Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          body_path: ${{ github.workspace }}-CHANGELOG.txt
+          repository: nornforge/firmware
           token: ${{ secrets.GH_PAT }}
           files: |
             firmware_pico.uf2
