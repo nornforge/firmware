@@ -1,7 +1,7 @@
 # This workflow will build a golang project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
-name: Go
+name: TinyGo
 
 on:
   push:
@@ -23,8 +23,14 @@ jobs:
         tinygo-version: '0.31.2'
         install-binaryen: 'false'
 
-    - name: Build
+    - name: 👷 Build
       run: tinygo build -size full -o firmware.uf2 -target=pico ./...
       
-    - name: Test
+    - name: 🧪 Test
       run: tinygo test -v ./...
+
+    - name: ✅ Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: firmware_pico.uf2
+        path: firmware_pico.uf2
