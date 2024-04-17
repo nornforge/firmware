@@ -23,7 +23,7 @@ jobs:
           tinygo-version: '0.31.2'
           install-binaryen: 'false'
       - name: 👷 Build
-        run: tinygo build -size full -o firmware_pico.uf2 -target=pico -ldflags="-X 'main.Version=${{ github.ref_name }}'" ./...
+        run: tinygo build -size full -o "norn-firmware_pico_${{ github.ref_name }}.uf2" -target=pico -ldflags="-X 'main.Version=${{ github.ref_name }}'" ./...
       - name: 📚 Changelog
         run: |
           go install github.com/goreleaser/chglog/cmd/chglog@latest
@@ -42,5 +42,5 @@ jobs:
           repository: nornforge/firmware
           token: ${{ secrets.GH_PAT }}
           files: |
-            firmware_pico.uf2
+            norn-firmware_pico_${{ github.ref_name }}.uf2
             checksums.txt
