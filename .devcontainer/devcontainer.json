@@ -16,7 +16,14 @@
 
 	// Share the Claude Code configuration and credentials with the host
 	"mounts": [
-		"source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind"
+		"source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind",
+		// Expose the host's device nodes, so a Pico plugged in (or re-enumerating
+		// after a reset) while the container is running shows up as /dev/ttyACM*
+		"source=/dev,target=/dev,type=bind"
+	],
+	// Allow access to USB CDC ACM serial devices (major 166), i.e. the Pico's USB serial port
+	"runArgs": [
+		"--device-cgroup-rule=c 166:* rwm"
 	],
 	"containerEnv": {
 		// Keeps .claude.json inside the mounted directory as well
