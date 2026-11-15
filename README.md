@@ -53,7 +53,7 @@ Once this firmware runs on the board, no button is needed anymore: `norn boot` f
 ### 3. Copy the image
 
 Copy the `.uf2` file onto the `RPI-RP2` drive. The board restarts into the new firmware on its own and the
-drive disappears. The status LED turns green and the serial port `/dev/ttyACM0` (on Linux) appears.
+drive disappears. The status LED turns green and the serial port `/dev/ttyACM*` (on Linux) appears.
 
 `norn version` shows the version of the CLI and of the firmware on the board.
 
