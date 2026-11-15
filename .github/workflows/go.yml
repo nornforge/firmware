@@ -26,6 +26,9 @@ jobs:
     - name: 👷 Build
       run: tinygo build -size full -o firmware_pico.uf2 -target=pico ./...
       
+    - name: 👷 Build (XIAO RP2040)
+      run: tinygo build -size short -o firmware_xiao-rp2040.uf2 -target=xiao-rp2040 ./firmware
+
     - name: 🧪 Test
       run: tinygo test -v ./...
 
