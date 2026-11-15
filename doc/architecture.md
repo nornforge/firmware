@@ -135,21 +135,21 @@ sequenceDiagram
     autonumber
     participant Host as norn CLI
     participant Reader as readFromSerial
-    participant Loop as command loop
+    participant Main as command loop
     participant Ctrl as controller
     participant Ch as channel
     participant LED as status.Light
 
     Host->>Reader: frame {"type":2,"channel":3,"status":true}
     Reader->>Reader: check marker, length, CRC-32C
-    Reader->>Loop: norn.Command via channel
-    Loop->>Ctrl: Handle(command)
+    Reader->>Main: norn.Command via channel
+    Main->>Ctrl: Handle(command)
     Ctrl->>Ch: Set(true)
     Ch->>Ch: pin.Set(true), remember state
-    Ctrl-->>Loop: Response{isOk, channel 3, status true}
-    Loop-->>Host: response frame
-    Loop->>LED: Show(Busy), blue for 150 ms
-    Note over Loop,LED: later ticks return the LED to Idle (green)
+    Ctrl-->>Main: Response{isOk, channel 3, status true}
+    Main-->>Host: response frame
+    Main->>LED: Show(Busy), blue for 150 ms
+    Note over Main,LED: later ticks return the LED to Idle (green)
 ```
 
 If the frame cannot be parsed, `readFromSerial` answers with an error frame itself and the command never
