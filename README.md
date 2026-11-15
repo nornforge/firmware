@@ -166,6 +166,39 @@ Off is the state the firmware falls back to. A relay is only on after a `set` co
 
 The relay states are not stored: after every restart all relays are off until they are switched on again.
 
+## Troubleshooting
+
+### Commands fail right after the board was plugged in
+
+The firmware only understands framed messages (see [Protocol](#protocol)). Anything else that reaches the
+serial port gets in the way of the next command. Two common sources on Linux:
+
+- **ModemManager** takes every new `/dev/ttyACM*` device for a possible modem and probes it with `AT`
+  commands such as `AT\r`, a few seconds after it appears.
+- **Terminal programs** such as minicom, picocom or screen send whatever is typed. minicom also sends its
+  modem init string, which starts with `AT`, when it opens the port, unless it is started with `-o`.
+
+With firmware up to v0.1.0 a single stray byte shifts every following frame, and `norn` reports errors until
+enough further bytes happen to restore the alignment. Newer firmware discards incomplete input once no byte
+has arrived for 100 ms, so it is back in sync shortly after the stray bytes. Unplugging the board, or
+restarting it with the reset button, always clears its input.
+
+To keep ModemManager away from the board, tell it to ignore the Pico's USB ID (`2e8a:000a`) with a udev
+rule, for example in `/etc/udev/rules.d/99-norn-firmware.rules`:
+
+```
+ATTRS{idVendor}=="2e8a", ATTRS{idProduct}=="000a", ENV{ID_MM_DEVICE_IGNORE}="1"
+```
+
+Then reload the rules with `sudo udevadm control --reload` and plug the board in again. If the board is not
+used with ModemManager anyway, `sudo systemctl disable --now ModemManager` has the same effect.
+
+`norn` should be the only program that has the port open: close terminal programs before using it. To look
+at the raw traffic, prefer a program that sends nothing on its own, such as `picocom` or `minicom -o`.
+
+`scripts/check-serial-recovery.sh` (see [Development](#development)) checks on a connected board how the
+firmware recovers from such input.
+
 ## Development
 
 The repository comes with a [dev container](.devcontainer/devcontainer.json) that provides Go and TinyGo.
