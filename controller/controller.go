@@ -9,13 +9,6 @@ import (
 	"github.com/nornforge/norn/pkg/norn"
 )
 
-// Brightness is the type of the command that sets the brightness of the
-// status LED. The brightness (0 to 255, 0 turns the LED off) is passed in the
-// channel field of the command and echoed in the channel field of the response.
-//
-// The norn package does not define this command yet.
-const Brightness norn.CommandType = 6
-
 // DefaultVersion is reported when no version was injected at build time.
 const DefaultVersion = "v0.0.0"
 
@@ -70,12 +63,13 @@ func (c *Controller) Handle(command norn.Command) (norn.Response, bool) {
 		return norn.Response{}, false
 	case norn.MaxChannels:
 		return norn.Response{Success: true, MaxChannel: len(c.channels)}, true
-	case Brightness:
-		const maxBrightness = 255
-		if command.Channel > maxBrightness {
+	case norn.Brightness:
+		// The brightness (0 turns the LED off) is passed in the channel field
+		// and echoed in the channel field of the response.
+		if command.Channel > norn.MaxBrightness {
 			return failure(fmt.Errorf("Invalid brightness provided: %d. Brightness must be in range [0,%d]",
 				command.Channel,
-				maxBrightness,
+				norn.MaxBrightness,
 			)), true
 		}
 		c.setBrightness(uint8(command.Channel))

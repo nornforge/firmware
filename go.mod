@@ -1,9 +1,9 @@
 module github.com/nornforge/firmware
 
-go 1.24
+go 1.26.0
 
 require (
-	github.com/nornforge/norn v0.1.4
+	github.com/nornforge/norn v0.2.0
 	tinygo.org/x/drivers v0.37.0
 )
 
