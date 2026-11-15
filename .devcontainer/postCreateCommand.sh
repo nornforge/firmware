@@ -8,11 +8,11 @@ TINY_GO_VERSION="0.44.0"
 TINY_GO_SHA256_AMD64="8810b20d88236a1353e35641a6a56df1720a7db97006aacc2c6656a3bb090b74"
 TINY_GO_SHA256_ARM64="c2addff1430c7066fc11900e93ee8d6dd14fce343a7b0e1d72da0509a58766ff"
 
-NORN_VERSION="0.1.4"
+NORN_VERSION="0.2.0"
 # SHA-256 of norn_${NORN_VERSION}_linux_<arch>.tar.gz, update together with the version.
 # The values are listed in norn_${NORN_VERSION}_checksums.txt of the release.
-NORN_SHA256_AMD64="f53ee78908b13b147df7471e867436c8470eeadb81692f1bab5663b4a812c099"
-NORN_SHA256_ARM64="e2bc05691b4cb101550540aa82ce0119cd112a6633bdaa227413f8c5228dc1fa"
+NORN_SHA256_AMD64="7633eaa886f24c27bde720f6d89bc1e40b56264cf4b46893341f3632733d5efc"
+NORN_SHA256_ARM64="9e5ec0d5d6808c55bada5e300f2de339a1160eedd0fbada8bb82208b3118b8e4"
 
 # The volume holding the GitHub CLI login is created owned by root
 sudo chown -R "$(id -u):$(id -g)" "${HOME}/.config"

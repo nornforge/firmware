@@ -248,7 +248,7 @@ func TestBrightnessIsSetAndEchoed(t *testing.T) {
 	f := newFixture(8, "")
 
 	for _, value := range []uint{0, 1, 16, 255} {
-		res := f.handle(t, norn.Command{Type: controller.Brightness, Channel: value})
+		res := f.handle(t, norn.Command{Type: norn.Brightness, Channel: value})
 		if !res.Success || res.Channel != value {
 			t.Errorf("brightness %d: unexpected response %+v", value, res)
 		}
@@ -276,7 +276,7 @@ func TestBrightnessOutOfRangeIsRejected(t *testing.T) {
 		1000: "Invalid brightness provided: 1000. Brightness must be in range [0,255]",
 	} {
 		f := newFixture(8, "")
-		res := f.handle(t, norn.Command{Type: controller.Brightness, Channel: value})
+		res := f.handle(t, norn.Command{Type: norn.Brightness, Channel: value})
 		if res.Success {
 			t.Errorf("brightness %d: reported success", value)
 		}

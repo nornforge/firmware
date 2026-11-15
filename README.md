@@ -99,7 +99,7 @@ next command succeeds.
 The brightness can be changed with command type 6. The value, from 0 (LED off) to 255 (full scale),
 is passed in the `channel` field and echoed in the `channel` field of the response. The default is 16.
 The setting is not stored: after a restart the default applies again.
-The norn CLI does not offer this command yet.
+With the [norn CLI](https://github.com/nornforge/norn) v0.2.0 or newer, run `norn brightness <0-255>`.
 
 ## Intended use
 
