@@ -22,3 +22,7 @@ var (
 		channel.New(machine.D7, 4),
 	}
 )
+
+func enterBootloader() {
+	machine.EnterBootloader()
+}
