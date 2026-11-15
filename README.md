@@ -160,6 +160,7 @@ Off is the state the firmware falls back to. A relay is only on after a `set` co
 | Bootloader requested by command (`norn boot`)          | all switched off before the bootloader is entered   |
 | Firmware stops handling commands for about two seconds | the watchdog restarts the firmware, all off         |
 | Invalid or unknown command                             | unchanged, the command is answered with an error    |
+| Command cut off (no byte for 100 ms within a frame)    | unchanged, the bytes are discarded without an answer |
 | Host program exits, or USB is unplugged while the board stays powered | unchanged                            |
 | Power lost                                             | all off                                             |
 
@@ -186,6 +187,13 @@ from the host as described in [Installing a release](#installing-a-release).
 
 On a Linux host the Pico's serial port is passed into the dev container as `/dev/ttyACM*`.
 The device node keeps the group it has on the host, so access from inside the container may need `sudo`.
+
+`scripts/check-serial-recovery.sh` checks on a connected board that the firmware stays in sync with the
+host after stray bytes or a command that was cut off:
+
+```sh
+sudo scripts/check-serial-recovery.sh /dev/ttyACM0
+```
 
 ### Releasing
 

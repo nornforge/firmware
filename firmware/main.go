@@ -1,14 +1,14 @@
 package main
 
 import (
-	"bufio"
+	"errors"
 	"fmt"
 	"machine"
-	"os"
 	"time"
 
 	"github.com/nornforge/firmware/channel"
 	"github.com/nornforge/firmware/controller"
+	"github.com/nornforge/firmware/receiver"
 	"github.com/nornforge/firmware/status"
 	"github.com/nornforge/norn/pkg/norn"
 	"tinygo.org/x/drivers/ws2812"
@@ -21,11 +21,20 @@ const tickInterval = 50 * time.Millisecond
 // The version to be injected by CI/CD
 var Version string // This needs to be empty in order be overwritten by  ldflags
 
+// pollInterval is how long readFromSerial sleeps while no byte is available.
+const pollInterval = time.Millisecond
+
 func readFromSerial(ch chan<- norn.Command) {
-	reader := bufio.NewReader(os.Stdin)
+	rx := receiver.New(machine.Serial, receiver.DefaultTimeout, time.Now, func() {
+		time.Sleep(pollInterval)
+	})
 	command := norn.Command{}
 	for {
-		err := command.Parse(reader)
+		err := rx.Next(&command)
+		if errors.Is(err, receiver.ErrCutOff) {
+			// The host gave up on this frame and does not expect an answer.
+			continue
+		}
 		if err != nil {
 			fmt.Print(norn.MarshalError(err))
 			continue

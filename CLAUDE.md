@@ -6,13 +6,15 @@ Waveshare Pico Relay B. A host talks to it over USB serial using the `norn` prot
 
 ## Layout
 
-- `firmware/main.go` – serial command loop (parses `norn.Command`, hands it to the controller)
+- `firmware/main.go` – serial command loop (gets `norn.Command`s from the receiver, hands them to the controller)
 - `firmware/pico.go` – pin mapping for `-target=pico` (build tag `pico`)
 - `firmware/xiao-rp2040.go` – pin mapping for `-target=xiao-rp2040` (NOT pin compatible with the Relay B board)
 - `channel/` – a relay output holding its state; drives a `channel.Pin` (satisfied by `machine.Pin`)
 - `controller/` – executes `norn.Command`s on the channels and builds the responses
+- `receiver/` – reads `norn.Command`s from the serial line; discards a frame cut off for longer than 100 ms
 - `status/` – what the RGB status LED shows (states, colors, hold times, brightness)
 - `scripts/build-release.sh` – builds image, SBOM and checksums into `dist/`; used by CI and the release workflow
+- `scripts/check-serial-recovery.sh` – on-device check that the firmware recovers from stray or cut-off input
 - `.devcontainer/` – dev container (Go + TinyGo, versions pinned in `postCreateCommand.sh`)
 
 ## Commands
@@ -29,8 +31,8 @@ Flashing from inside the dev container is not supported: copy the `.uf2` onto th
 ## Conventions
 
 - `firmware/` imports `machine`, so use `tinygo` (not plain `go build`/`go vet`) for building and testing.
-- Keep `channel/` and `controller/` free of `machine` imports so their tests run without hardware
-  (also with plain `go test ./channel ./controller`). New behaviour belongs there, with tests.
+- Keep `channel/`, `controller/` and `receiver/` free of `machine` imports so their tests run without hardware
+  (also with plain `go test ./channel ./controller ./receiver`). New behaviour belongs there, with tests.
 - Keep the TinyGo and Go versions in `.devcontainer/postCreateCommand.sh`, `.devcontainer/devcontainer.json`
   and `.github/workflows/*.yml` in sync.
 - The dev container installs the `norn` CLI (version pinned in `.devcontainer/postCreateCommand.sh`); keep it on the
