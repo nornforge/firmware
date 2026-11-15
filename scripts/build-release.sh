@@ -11,6 +11,12 @@ set -euo pipefail
 VERSION="${1:?usage: $0 <version> [output directory]}"
 DIST="${2:-dist}"
 TARGET="pico"
+
+# Prevent path traversal via VERSION being used in output filenames.
+case "${VERSION}" in
+  *"/"*|*".."*) echo "invalid version: ${VERSION}" >&2; exit 2 ;;
+esac
+
 IMAGE="norn-firmware_${TARGET}_${VERSION}.uf2"
 SBOM="norn-firmware_${TARGET}_${VERSION}.cdx.json"
 
