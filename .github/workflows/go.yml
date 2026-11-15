@@ -16,30 +16,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-    - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
-      with:
-        go-version: '1.27'
-    - uses: acifani/setup-tinygo@db56321a62b9a67922bb9ac8f9d085e218807bb3 # v2.0.1
-      with:
-        tinygo-version: '0.44.0'
-        install-binaryen: 'false'
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version: '1.27'
+      - uses: acifani/setup-tinygo@db56321a62b9a67922bb9ac8f9d085e218807bb3 # v2.0.1
+        with:
+          tinygo-version: '0.44.0'
+          install-binaryen: 'false'
 
-    - name: 🧹 Format
-      run: test -z "$(gofmt -l . | tee /dev/stderr)"
+      - name: 🧹 Format
+        run: test -z "$(gofmt -l . | tee /dev/stderr)"
 
-    - name: 🧪 Test
-      run: tinygo test -v ./...
+      - name: 🧪 Test
+        run: tinygo test -v ./...
 
-    # The same script builds the release, so a broken release build shows up here
-    - name: 👷 Build firmware, SBOM and checksums
-      run: ./scripts/build-release.sh v0.0.0-ci dist
+      # The same script builds the release, so a broken release build shows up here
+      - name: 👷 Build firmware, SBOM and checksums
+        run: ./scripts/build-release.sh v0.0.0-ci dist
 
-    - name: 👷 Build (XIAO RP2040)
-      run: tinygo build -size short -o firmware_xiao-rp2040.uf2 -target=xiao-rp2040 ./firmware
+      - name: 👷 Build (XIAO RP2040)
+        run: tinygo build -size short -o firmware_xiao-rp2040.uf2 -target=xiao-rp2040 ./firmware
 
-    - name: ✅ Upload Artifact
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      with:
-        name: firmware_pico
-        path: dist/
+      - name: ✅ Upload Artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: firmware_pico
+          path: dist/
