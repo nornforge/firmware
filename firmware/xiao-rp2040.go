@@ -22,7 +22,3 @@ var (
 		output(machine.D7, 4),
 	}
 )
-
-func enterBootloader() {
-	machine.EnterBootloader()
-}
