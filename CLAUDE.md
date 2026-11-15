@@ -27,4 +27,7 @@ Flashing from inside the dev container is not supported: copy the `.uf2` onto th
 - Code imports `machine`, so use `tinygo` (not plain `go build`/`go vet`) for building and testing.
 - Keep the TinyGo and Go versions in `.devcontainer/postCreateCommand.sh`, `.devcontainer/devcontainer.json`
   and `.github/workflows/*.yml` in sync.
+- The dev container installs the `norn` CLI (version pinned in `.devcontainer/postCreateCommand.sh`); keep it on the
+  same version as the `github.com/nornforge/norn` module in `go.mod`. A connected Pico shows up as `/dev/ttyACM0`,
+  access needs `sudo` (e.g. `sudo norn version`).
 - Commit messages follow Conventional Commits (`feat:`, `fix:`, `ci:` …); the release changelog is generated from them by `chglog`.
