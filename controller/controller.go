@@ -58,7 +58,7 @@ func (c *Controller) Handle(command norn.Command) (norn.Response, bool) {
 	case norn.MaxChannels:
 		return norn.Response{Success: true, MaxChannel: len(c.channels)}, true
 	}
-	return norn.Response{}, false
+	return failure(fmt.Errorf("Unknown command type: %d", command.Type)), true
 }
 
 func (c *Controller) channel(index uint) (*channel.Channel, error) {
