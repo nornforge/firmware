@@ -4,43 +4,52 @@ name: Firmware Release
 on:
   push:
     tags:
-      - '*'
+      # Only release for version tags like v1.2.3
+      - 'v*.*.*'
+
+permissions:
+  contents: read
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write      # create the release
+      id-token: write      # sign the build provenance
+      attestations: write  # store the build provenance
     steps:
       - name: 🚚 Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
       - name: 🔧 Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version: '1.27'
-      - uses: acifani/setup-tinygo@v2
+      - uses: acifani/setup-tinygo@db56321a62b9a67922bb9ac8f9d085e218807bb3 # v2.0.1
         with:
           tinygo-version: '0.44.0'
           install-binaryen: 'false'
-      - name: 👷 Build
-        run: tinygo build -size full -o "norn-firmware_pico_${{ github.ref_name }}.uf2" -target=pico -ldflags="-X 'main.Version=${{ github.ref_name }}'" ./...
+      - name: 🧪 Test
+        run: tinygo test -v ./...
+      - name: 👷 Build firmware, SBOM and checksums
+        run: ./scripts/build-release.sh "${GITHUB_REF_NAME}" dist
       - name: 📚 Changelog
         run: |
-          go install github.com/goreleaser/chglog/cmd/chglog@latest
+          go install github.com/goreleaser/chglog/cmd/chglog@v0.7.5
           chglog init
-          chglog format --template release > ${{ github.workspace }}-CHANGELOG.txt
-      - name: 🔒 Generate checksums
-        run: |
-          sudo apt-get update
-          sudo apt-get install coreutils
-          sha256sum "norn-firmware_pico_${{ github.ref_name }}.uf2" > checksums.txt
-      - name: 🎉 Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+          chglog format --template release > "${RUNNER_TEMP}/CHANGELOG.txt"
+      - name: 🔏 Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          body_path: ${{ github.workspace }}-CHANGELOG.txt
-          repository: nornforge/firmware
-          token: ${{ secrets.GH_PAT }}
+          subject-path: |
+            dist/*.uf2
+            dist/*.cdx.json
+      - name: 🎉 Release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        with:
+          body_path: ${{ runner.temp }}/CHANGELOG.txt
           files: |
-            norn-firmware_pico_${{ github.ref_name }}.uf2
-            checksums.txt
+            dist/*.uf2
+            dist/*.cdx.json
+            dist/checksums.txt

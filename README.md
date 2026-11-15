@@ -19,7 +19,8 @@ The project is split into two parts:
 
 1. Download `norn-firmware_pico_<version>.uf2` from the
    [latest release](https://github.com/nornforge/firmware/releases/latest).
-   `checksums.txt` holds its SHA-256 checksum.
+   `checksums.txt` holds its SHA-256 checksum. To check that the image was built by this repository's
+   release workflow, run `gh attestation verify norn-firmware_pico_<version>.uf2 --repo nornforge/firmware`.
 2. Hold the `BOOTSEL` button on the Pico while plugging it into the host. It shows up as a USB drive named `RPI-RP2`.
 3. Copy the `.uf2` file onto that drive. The Pico reboots into the new firmware and the on-board LED turns on.
 
@@ -154,9 +155,20 @@ The device node keeps the group it has on the host, so access from inside the co
 
 ### Releasing
 
-Pushing a tag builds the firmware with that tag as its version and publishes it as a GitHub release.
+Pushing a version tag such as `v1.2.3` runs the tests, builds the firmware with that tag as its version
+and publishes a GitHub release with:
+
+- `norn-firmware_pico_<version>.uf2`, the firmware image
+- `norn-firmware_pico_<version>.cdx.json`, its software bill of materials (SBOM) in
+  [CycloneDX](https://cyclonedx.org) format. It lists the Go modules linked into the image,
+  TinyGo and the Go standard library.
+- `checksums.txt`, the SHA-256 checksums of both files
+
+Image and SBOM carry a signed [build provenance attestation](https://docs.github.com/en/actions/concepts/security/artifact-attestations).
 The changelog is generated from the commit messages, which therefore follow
 [Conventional Commits](https://www.conventionalcommits.org).
+
+The same files can be built locally with `scripts/build-release.sh <version>`; they end up in `dist/`.
 
 ## License
 

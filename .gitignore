@@ -22,3 +22,6 @@ go.work
 
 # Firmware images produced by tinygo build
 *.uf2
+
+# Release artifacts produced by scripts/build-release.sh
+dist/
