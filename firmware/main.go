@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"machine"
 	"os"
+	"time"
 
 	"github.com/nornforge/firmware/channel"
 	"github.com/nornforge/firmware/controller"
@@ -28,7 +29,9 @@ func readFromSerial(ch chan<- norn.Command) {
 }
 
 // output configures the pin as an output and returns it as the channel with the given index.
+// The level is set before the pin becomes an output, so the relay does not see a pulse.
 func output(pin machine.Pin, index uint) *channel.Channel {
+	pin.Low()
 	pin.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	return channel.New(pin, index)
 }
@@ -39,10 +42,19 @@ func main() {
 	ctrl := controller.New(Channels, Version, enterBootloader)
 	commands := make(chan norn.Command)
 	go readFromSerial(commands) // make it parallel
+
+	// The watchdog is fed from the command loop: if the loop stops running,
+	// the firmware restarts instead of staying unresponsive.
+	startWatchdog()
+	idle := time.NewTicker(watchdogInterval)
 	for {
-		command := <-commands
-		if res, ok := ctrl.Handle(command); ok {
-			fmt.Print(string(res.Marshal()))
+		select {
+		case command := <-commands:
+			if res, ok := ctrl.Handle(command); ok {
+				fmt.Print(string(res.Marshal()))
+			}
+		case <-idle.C:
 		}
+		feedWatchdog()
 	}
 }

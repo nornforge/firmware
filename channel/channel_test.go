@@ -23,7 +23,7 @@ func (p *fakePin) last(t *testing.T) bool {
 	return p.levels[len(p.levels)-1]
 }
 
-func TestNewIsOffAndDoesNotTouchThePin(t *testing.T) {
+func TestNewSwitchesThePinOff(t *testing.T) {
 	pin := &fakePin{}
 	ch := channel.New(pin, 3)
 	if ch.Get() {
@@ -32,8 +32,8 @@ func TestNewIsOffAndDoesNotTouchThePin(t *testing.T) {
 	if ch.Index() != 3 {
 		t.Errorf("Index() = %d, want 3", ch.Index())
 	}
-	if len(pin.levels) != 0 {
-		t.Errorf("New wrote %v to the pin, want no writes", pin.levels)
+	if len(pin.levels) != 1 || pin.levels[0] {
+		t.Errorf("New wrote %v to the pin, want a single low", pin.levels)
 	}
 }
 

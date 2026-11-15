@@ -22,6 +22,8 @@ type fixture struct {
 	ctrl        *controller.Controller
 	pins        []*fakePin
 	bootloaders int
+	// highAtBootloader is set if a pin was high when the bootloader was entered.
+	highAtBootloader bool
 }
 
 func newFixture(numChannels int, version string) *fixture {
@@ -32,7 +34,16 @@ func newFixture(numChannels int, version string) *fixture {
 		f.pins = append(f.pins, pin)
 		channels = append(channels, channel.New(pin, uint(i+1)))
 	}
-	f.ctrl = controller.New(channels, version, func() { f.bootloaders++ })
+	f.ctrl = controller.New(channels, version, func() {
+		f.bootloaders++
+		for _, pin := range f.pins {
+			f.highAtBootloader = f.highAtBootloader || pin.level
+		}
+	})
+	// Creating a channel switches it off. Only count what the commands write.
+	for _, pin := range f.pins {
+		pin.writes = 0
+	}
 	return f
 }
 
@@ -161,6 +172,40 @@ func TestBootloaderIsEnteredWithoutResponse(t *testing.T) {
 	}
 }
 
+func TestAllChannelsAreOffBeforeTheBootloaderIsEntered(t *testing.T) {
+	f := newFixture(8, "")
+	for _, index := range []uint{1, 4, 8} {
+		f.handle(t, norn.Command{Type: norn.Set, Channel: index, Status: true})
+	}
+
+	f.ctrl.Handle(norn.Command{Type: norn.Bootloader})
+
+	if f.bootloaders != 1 {
+		t.Fatalf("the bootloader was entered %d times, want once", f.bootloaders)
+	}
+	if f.highAtBootloader {
+		t.Error("a pin was still high when the bootloader was entered")
+	}
+}
+
+func TestAllOff(t *testing.T) {
+	f := newFixture(8, "")
+	for index := uint(1); index <= 8; index++ {
+		f.handle(t, norn.Command{Type: norn.Set, Channel: index, Status: true})
+	}
+
+	f.ctrl.AllOff()
+
+	for index := uint(1); index <= 8; index++ {
+		if f.pins[index-1].level {
+			t.Errorf("the pin of channel %d is still high", index)
+		}
+		if res := f.handle(t, norn.Command{Type: norn.Get, Channel: index}); res.Status {
+			t.Errorf("channel %d still reports on", index)
+		}
+	}
+}
+
 func TestOtherCommandsDoNotEnterTheBootloader(t *testing.T) {
 	f := newFixture(8, "")
 
@@ -169,5 +214,28 @@ func TestOtherCommandsDoNotEnterTheBootloader(t *testing.T) {
 	}
 	if f.bootloaders != 0 {
 		t.Errorf("the bootloader was entered %d times, want never", f.bootloaders)
+	}
+}
+
+func TestUnknownCommandTypeIsRejected(t *testing.T) {
+	for commandType, message := range map[norn.CommandType]string{
+		norn.Nil: "Unknown command type: 0",
+		6:        "Unknown command type: 6",
+		255:      "Unknown command type: 255",
+	} {
+		f := newFixture(8, "")
+		res := f.handle(t, norn.Command{Type: commandType, Channel: 1, Status: true})
+		if res.Success {
+			t.Errorf("type %d: reported success", commandType)
+		}
+		if res.Message != message {
+			t.Errorf("type %d: message %q, want %q", commandType, res.Message, message)
+		}
+		if f.pins[0].writes != 0 {
+			t.Errorf("type %d: a pin was written", commandType)
+		}
+		if f.bootloaders != 0 {
+			t.Errorf("type %d: the bootloader was entered", commandType)
+		}
 	}
 }

@@ -33,7 +33,8 @@ The firmware shows up on the host as a USB serial port (`/dev/ttyACM*` on Linux)
 Use the [norn CLI](https://github.com/nornforge/norn) to switch the relays, read their state
 or serve them over a REST API.
 
-The relay state is not kept across a reset or power cycle.
+See [Intended use](#intended-use) for what the firmware is meant for and
+[Relay states](#relay-states) for how the relays behave on start, restart and errors.
 
 ### Channels
 
@@ -79,6 +80,36 @@ The `type` of a command selects what the firmware does:
 Every command except bootloader is answered with a frame of the same layout carrying
 `isOk`, `message`, `channel`, `max_channel` and `status`. On an error `isOk` is `false`
 and `message` holds the reason.
+
+## Intended use
+
+The firmware is meant for switching loads in development and test setups, for example the power supply
+of a device under test, from a host that is connected over USB and trusted.
+
+It is not meant for, and must not be relied on in, applications where a relay that switches unexpectedly,
+or does not switch, can endanger people or cause damage. It is not a safety component:
+
+- The firmware does not read back the relay contacts. The state it reports is the state it last set.
+- The electrical limits are those of the Waveshare Pico Relay B; see its
+  [documentation](https://www.waveshare.com/wiki/Pico-Relay-B).
+- There is no authentication. Whoever can write to the serial port can switch every relay and send the Pico
+  into its bootloader, where new firmware can be installed. Anything that makes the port reachable for others,
+  such as the REST server of the norn CLI, has to be protected by the operator.
+
+### Relay states
+
+Off is the state the firmware falls back to. A relay is only on after a `set` command switched it on.
+
+| Situation                                              | Relays                                              |
+| ------------------------------------------------------ | --------------------------------------------------- |
+| Power-up or reset                                      | all off                                             |
+| Bootloader requested by command (`norn boot`)          | all switched off before the bootloader is entered   |
+| Firmware stops handling commands for about two seconds | the watchdog restarts the firmware, all off         |
+| Invalid or unknown command                             | unchanged, the command is answered with an error    |
+| Host program exits, or USB is unplugged while the board stays powered | unchanged                            |
+| Power lost                                             | all off                                             |
+
+The relay states are not stored: after every restart all relays are off until they are switched on again.
 
 ## Development
 
