@@ -75,10 +75,30 @@ The `type` of a command selects what the firmware does:
 | 3    | version      | report the firmware version in `message`               |
 | 4    | bootloader   | reboot into the USB bootloader                         |
 | 5    | max channels | report the number of channels in `max_channel`         |
+| 6    | brightness   | set the brightness of the status LED, see below        |
 
 Every command except bootloader is answered with a frame of the same layout carrying
 `isOk`, `message`, `channel`, `max_channel` and `status`. On an error `isOk` is `false`
 and `message` holds the reason.
+
+### Status LED
+
+The RGB LED of the Waveshare Pico Relay B shows what the firmware is doing:
+
+| Color   | Meaning                                                                    |
+| ------- | -------------------------------------------------------------------------- |
+| green   | the firmware is running and waiting for commands                           |
+| blue    | a command was executed, shown for 150 ms                                   |
+| red     | a command was answered with an error, shown for one second                 |
+| magenta | the bootloader was requested; the LED keeps the color while it is running  |
+
+A new command replaces the color of the previous one, so a red LED turns blue as soon as the
+next command succeeds.
+
+The brightness can be changed with command type 6. The value, from 0 (LED off) to 255 (full scale),
+is passed in the `channel` field and echoed in the `channel` field of the response. The default is 16.
+The setting is not stored: after a restart the default applies again.
+The norn CLI does not offer this command yet.
 
 ## Intended use
 
