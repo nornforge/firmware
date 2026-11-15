@@ -16,10 +16,10 @@ import (
 var (
 	led      = machine.LED
 	Channels = []*channel.Channel{
-		channel.New(machine.D10, 1),
-		channel.New(machine.D9, 2),
-		channel.New(machine.D8, 3),
-		channel.New(machine.D7, 4),
+		output(machine.D10, 1),
+		output(machine.D9, 2),
+		output(machine.D8, 3),
+		output(machine.D7, 4),
 	}
 )
 

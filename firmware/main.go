@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/nornforge/firmware/channel"
+	"github.com/nornforge/firmware/controller"
 	"github.com/nornforge/norn/pkg/norn"
 )
 
@@ -26,68 +27,21 @@ func readFromSerial(ch chan<- norn.Command) {
 	}
 }
 
-func getChannelByIndex(index uint, channels []*channel.Channel) (*channel.Channel, error) {
-	const minChannel = 1
-	var maxChannel uint = uint(len(channels))
-	if index > maxChannel || index < minChannel {
-		return nil, fmt.Errorf("Invalid index provided: %d. Channel must be in range [%d,%d]",
-			index,
-			minChannel,
-			maxChannel,
-		)
-	}
-	return channels[index-1], nil
+// output configures the pin as an output and returns it as the channel with the given index.
+func output(pin machine.Pin, index uint) *channel.Channel {
+	pin.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	return channel.New(pin, index)
 }
 
 func main() {
 	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	led.Set(true)
+	ctrl := controller.New(Channels, Version, enterBootloader)
 	commands := make(chan norn.Command)
 	go readFromSerial(commands) // make it parallel
 	for {
 		command := <-commands
-		switch command.Type {
-		case norn.Get:
-			ch, err := getChannelByIndex(command.Channel, Channels)
-			if err != nil {
-				fmt.Print(norn.MarshalError(err))
-				continue
-			}
-			res := norn.Response{
-				Success: true,
-				Channel: ch.Index(),
-				Status:  ch.Get(),
-			}
-			fmt.Print(string(res.Marshal()))
-		case norn.Set:
-			ch, err := getChannelByIndex(command.Channel, Channels)
-			if err != nil {
-				fmt.Print(norn.MarshalError(err))
-				continue
-			}
-			ch.Set(command.Status)
-			res := norn.Response{
-				Success: true,
-				Channel: ch.Index(),
-				Status:  ch.Get(),
-			}
-			fmt.Print(string(res.Marshal()))
-		case norn.Version:
-			if Version == "" {
-				Version = "v0.0.0"
-			}
-			res := norn.Response{
-				Success: true,
-				Message: fmt.Sprintf("%s", Version),
-			}
-			fmt.Print(string(res.Marshal()))
-		case norn.Bootloader:
-			enterBootloader()
-		case norn.MaxChannels:
-			res := norn.Response{
-				Success:    true,
-				MaxChannel: len(Channels),
-			}
+		if res, ok := ctrl.Handle(command); ok {
 			fmt.Print(string(res.Marshal()))
 		}
 	}

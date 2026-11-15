@@ -6,10 +6,11 @@ Waveshare Pico Relay B. A host talks to it over USB serial using the `norn` prot
 
 ## Layout
 
-- `firmware/main.go` – serial command loop (parses `norn.Command`, get/set relay channels)
+- `firmware/main.go` – serial command loop (parses `norn.Command`, hands it to the controller)
 - `firmware/pico.go` – pin mapping for `-target=pico` (build tag `pico`)
 - `firmware/xiao-rp2040.go` – pin mapping for `-target=xiao-rp2040` (NOT pin compatible with the Relay B board)
-- `channel/` – small wrapper around a `machine.Pin` holding the relay state
+- `channel/` – a relay output holding its state; drives a `channel.Pin` (satisfied by `machine.Pin`)
+- `controller/` – executes `norn.Command`s on the channels and builds the responses
 - `scripts/build-release.sh` – builds image, SBOM and checksums into `dist/`; used by CI and the release workflow
 - `.devcontainer/` – dev container (Go + TinyGo, versions pinned in `postCreateCommand.sh`)
 
@@ -26,7 +27,9 @@ Flashing from inside the dev container is not supported: copy the `.uf2` onto th
 
 ## Conventions
 
-- Code imports `machine`, so use `tinygo` (not plain `go build`/`go vet`) for building and testing.
+- `firmware/` imports `machine`, so use `tinygo` (not plain `go build`/`go vet`) for building and testing.
+- Keep `channel/` and `controller/` free of `machine` imports so their tests run without hardware
+  (also with plain `go test ./channel ./controller`). New behaviour belongs there, with tests.
 - Keep the TinyGo and Go versions in `.devcontainer/postCreateCommand.sh`, `.devcontainer/devcontainer.json`
   and `.github/workflows/*.yml` in sync.
 - The dev container installs the `norn` CLI (version pinned in `.devcontainer/postCreateCommand.sh`); keep it on the
