@@ -17,6 +17,8 @@
 	// Share the Claude Code configuration and credentials with the host
 	"mounts": [
 		"source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind",
+		// Keep the GitHub CLI login across container rebuilds
+		"source=gh-config-${devcontainerId},target=/home/vscode/.config/gh,type=volume",
 		// Expose the host's device nodes, so a Pico plugged in (or re-enumerating
 		// after a reset) while the container is running shows up as /dev/ttyACM*
 		"source=/dev,target=/dev,type=bind"
