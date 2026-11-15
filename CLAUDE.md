@@ -11,6 +11,7 @@ Waveshare Pico Relay B. A host talks to it over USB serial using the `norn` prot
 - `firmware/xiao-rp2040.go` – pin mapping for `-target=xiao-rp2040` (NOT pin compatible with the Relay B board)
 - `channel/` – a relay output holding its state; drives a `channel.Pin` (satisfied by `machine.Pin`)
 - `controller/` – executes `norn.Command`s on the channels and builds the responses
+- `status/` – what the RGB status LED shows (states, colors, hold times, brightness)
 - `scripts/build-release.sh` – builds image, SBOM and checksums into `dist/`; used by CI and the release workflow
 - `.devcontainer/` – dev container (Go + TinyGo, versions pinned in `postCreateCommand.sh`)
 

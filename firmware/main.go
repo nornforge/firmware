@@ -9,8 +9,14 @@ import (
 
 	"github.com/nornforge/firmware/channel"
 	"github.com/nornforge/firmware/controller"
+	"github.com/nornforge/firmware/status"
 	"github.com/nornforge/norn/pkg/norn"
+	"tinygo.org/x/drivers/ws2812"
 )
+
+// tickInterval is how often an idle command loop updates the status LED and
+// feeds the watchdog.
+const tickInterval = 50 * time.Millisecond
 
 // The version to be injected by CI/CD
 var Version string // This needs to be empty in order be overwritten by  ldflags
@@ -39,22 +45,36 @@ func output(pin machine.Pin, index uint) *channel.Channel {
 func main() {
 	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	led.Set(true)
-	ctrl := controller.New(Channels, Version, enterBootloader)
+
+	rgb := ws2812.NewWS2812(rgbPin)
+	light := status.NewLight(&rgb, time.Now())
+
+	ctrl := controller.New(Channels, Version, func() {
+		// The LED keeps this color while the bootloader is running.
+		light.Show(status.Updating, time.Now())
+		enterBootloader()
+	}, light.SetBrightness)
 	commands := make(chan norn.Command)
 	go readFromSerial(commands) // make it parallel
 
 	// The watchdog is fed from the command loop: if the loop stops running,
 	// the firmware restarts instead of staying unresponsive.
 	startWatchdog()
-	idle := time.NewTicker(watchdogInterval)
+	idle := time.NewTicker(tickInterval)
 	for {
 		select {
 		case command := <-commands:
 			if res, ok := ctrl.Handle(command); ok {
 				fmt.Print(string(res.Marshal()))
+				if res.Success {
+					light.Show(status.Busy, time.Now())
+				} else {
+					light.Show(status.Failed, time.Now())
+				}
 			}
 		case <-idle.C:
 		}
+		light.Tick(time.Now())
 		feedWatchdog()
 	}
 }

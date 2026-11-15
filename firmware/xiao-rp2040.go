@@ -14,7 +14,9 @@ import (
 )
 
 var (
-	led      = machine.LED
+	led = machine.LED
+	// The on-board RGB LED. It is not powered here, so it stays dark.
+	rgbPin   = machine.NEOPIXEL
 	Channels = []*channel.Channel{
 		output(machine.D10, 1),
 		output(machine.D9, 2),
