@@ -21,7 +21,8 @@ type Controller struct {
 
 // New returns a Controller for the given channels. The channel at position i
 // is addressed with index i+1. An empty version is replaced by DefaultVersion.
-// enterBootloader is called when a bootloader command is received.
+// enterBootloader is called when a bootloader command is received, after all
+// channels have been switched off.
 func New(channels []*channel.Channel, version string, enterBootloader func()) *Controller {
 	if version == "" {
 		version = DefaultVersion
@@ -53,12 +54,21 @@ func (c *Controller) Handle(command norn.Command) (norn.Response, bool) {
 	case norn.Version:
 		return norn.Response{Success: true, Message: c.version}, true
 	case norn.Bootloader:
+		// Nothing controls the channels while the bootloader is running.
+		c.AllOff()
 		c.enterBootloader()
 		return norn.Response{}, false
 	case norn.MaxChannels:
 		return norn.Response{Success: true, MaxChannel: len(c.channels)}, true
 	}
 	return failure(fmt.Errorf("Unknown command type: %d", command.Type)), true
+}
+
+// AllOff switches every channel off.
+func (c *Controller) AllOff() {
+	for _, ch := range c.channels {
+		ch.Set(false)
+	}
 }
 
 func (c *Controller) channel(index uint) (*channel.Channel, error) {
