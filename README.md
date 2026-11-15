@@ -17,15 +17,45 @@ The project is split into two parts:
 
 ## Installing a release
 
-1. Download `norn-firmware_pico_<version>.uf2` from the
-   [latest release](https://github.com/nornforge/firmware/releases/latest).
-   `checksums.txt` holds its SHA-256 checksum. To check that the image was built by this repository's
-   release workflow, run `gh attestation verify norn-firmware_pico_<version>.uf2 --repo nornforge/firmware`.
-2. Hold the `BOOTSEL` button on the Pico while plugging it into the host. It shows up as a USB drive named `RPI-RP2`.
-3. Copy the `.uf2` file onto that drive. The Pico reboots into the new firmware and the on-board LED turns on.
+### 1. Download and check the image
 
-A Pico that already runs this firmware can be sent into the bootloader without pressing the button,
-using `norn boot` from the [norn CLI](https://github.com/nornforge/norn).
+Download `norn-firmware_pico_<version>.uf2` and `checksums.txt` from the
+[latest release](https://github.com/nornforge/firmware/releases/latest) and check them:
+
+```sh
+sha256sum --check --ignore-missing checksums.txt
+gh attestation verify norn-firmware_pico_<version>.uf2 --repo nornforge/firmware
+```
+
+The first command checks that the download is complete, the second that the image was built by this
+repository's release workflow.
+
+### 2. Put the board into flash mode
+
+The first time, the board has to be put into flash mode with its buttons. On the Waveshare Pico Relay B
+they sit next to the Pico; in the picture below the boot button is marked **6** and the reset button **7**.
+
+![Buttons of the Waveshare Pico Relay B](https://github.com/nornforge/firmware/assets/6263439/7bc95cdc-e737-4fe6-aa51-592e51f0315b)
+
+1. Connect the Pico to the host with a USB cable.
+2. Press and hold the **boot** button (6).
+3. Press the **reset** button (7) briefly and release it.
+4. Release the **boot** button.
+
+The board now shows up as a USB drive named `RPI-RP2`. If it does not, repeat the steps and make sure
+the boot button is still held down while reset is released.
+
+Without the reset button, holding the boot button while plugging in the USB cable has the same effect.
+
+Once this firmware runs on the board, no button is needed anymore: `norn boot` from the
+[norn CLI](https://github.com/nornforge/norn) sends it into flash mode.
+
+### 3. Copy the image
+
+Copy the `.uf2` file onto the `RPI-RP2` drive. The board restarts into the new firmware on its own and the
+drive disappears. The status LED turns green and the serial port `/dev/ttyACM0` (on Linux) appears.
+
+`norn version` shows the version of the CLI and of the firmware on the board.
 
 ## Usage
 
