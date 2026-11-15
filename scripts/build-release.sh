@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Builds the release artifacts for the Raspberry Pi Pico:
 #
 #   norn-firmware_pico_<version>.uf2       the firmware image
@@ -6,7 +6,7 @@
 #   checksums.txt                          SHA-256 checksums of both
 #
 # usage: scripts/build-release.sh <version> [output directory, default: dist]
-set -eu
+set -euo pipefail
 
 VERSION="${1:?usage: $0 <version> [output directory]}"
 DIST="${2:-dist}"
