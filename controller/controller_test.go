@@ -24,6 +24,8 @@ type fixture struct {
 	bootloaders int
 	// highAtBootloader is set if a pin was high when the bootloader was entered.
 	highAtBootloader bool
+	// brightness holds every value the brightness was set to.
+	brightness []uint8
 }
 
 func newFixture(numChannels int, version string) *fixture {
@@ -39,6 +41,8 @@ func newFixture(numChannels int, version string) *fixture {
 		for _, pin := range f.pins {
 			f.highAtBootloader = f.highAtBootloader || pin.level
 		}
+	}, func(brightness uint8) {
+		f.brightness = append(f.brightness, brightness)
 	})
 	// Creating a channel switches it off. Only count what the commands write.
 	for _, pin := range f.pins {
@@ -220,7 +224,7 @@ func TestOtherCommandsDoNotEnterTheBootloader(t *testing.T) {
 func TestUnknownCommandTypeIsRejected(t *testing.T) {
 	for commandType, message := range map[norn.CommandType]string{
 		norn.Nil: "Unknown command type: 0",
-		6:        "Unknown command type: 6",
+		7:        "Unknown command type: 7",
 		255:      "Unknown command type: 255",
 	} {
 		f := newFixture(8, "")
@@ -236,6 +240,51 @@ func TestUnknownCommandTypeIsRejected(t *testing.T) {
 		}
 		if f.bootloaders != 0 {
 			t.Errorf("type %d: the bootloader was entered", commandType)
+		}
+	}
+}
+
+func TestBrightnessIsSetAndEchoed(t *testing.T) {
+	f := newFixture(8, "")
+
+	for _, value := range []uint{0, 1, 16, 255} {
+		res := f.handle(t, norn.Command{Type: controller.Brightness, Channel: value})
+		if !res.Success || res.Channel != value {
+			t.Errorf("brightness %d: unexpected response %+v", value, res)
+		}
+	}
+
+	want := []uint8{0, 1, 16, 255}
+	if len(f.brightness) != len(want) {
+		t.Fatalf("brightness was set to %v, want %v", f.brightness, want)
+	}
+	for i := range want {
+		if f.brightness[i] != want[i] {
+			t.Errorf("brightness was set to %v, want %v", f.brightness, want)
+		}
+	}
+	for i, pin := range f.pins {
+		if pin.writes != 0 {
+			t.Errorf("the pin of channel %d was written", i+1)
+		}
+	}
+}
+
+func TestBrightnessOutOfRangeIsRejected(t *testing.T) {
+	for value, message := range map[uint]string{
+		256:  "Invalid brightness provided: 256. Brightness must be in range [0,255]",
+		1000: "Invalid brightness provided: 1000. Brightness must be in range [0,255]",
+	} {
+		f := newFixture(8, "")
+		res := f.handle(t, norn.Command{Type: controller.Brightness, Channel: value})
+		if res.Success {
+			t.Errorf("brightness %d: reported success", value)
+		}
+		if res.Message != message {
+			t.Errorf("brightness %d: message %q, want %q", value, res.Message, message)
+		}
+		if len(f.brightness) != 0 {
+			t.Errorf("brightness %d: the brightness was set to %v", value, f.brightness)
 		}
 	}
 }

@@ -9,7 +9,9 @@ import (
 )
 
 var (
-	led      = machine.LED
+	led = machine.LED
+	// The RGB LED of the Waveshare Pico Relay B
+	rgbPin   = machine.GP13
 	Channels = []*channel.Channel{
 		output(machine.GP21, 1),
 		output(machine.GP20, 2),

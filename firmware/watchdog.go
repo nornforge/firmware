@@ -12,8 +12,6 @@ const (
 	// watchdogTimeout is the time after which the firmware is restarted if the
 	// command loop stops running, for example after a panic.
 	watchdogTimeout = 2 * time.Second
-	// watchdogInterval is how often an idle command loop feeds the watchdog.
-	watchdogInterval = watchdogTimeout / 4
 )
 
 func startWatchdog() {
