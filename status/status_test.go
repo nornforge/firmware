@@ -2,6 +2,7 @@ package status_test
 
 import (
 	"image/color"
+	"io"
 	"testing"
 	"time"
 
@@ -10,11 +11,12 @@ import (
 
 type fakeLED struct {
 	writes []color.RGBA
+	err    error
 }
 
 func (f *fakeLED) WriteColors(colors []color.RGBA) error {
 	f.writes = append(f.writes, colors...)
-	return nil
+	return f.err
 }
 
 func (f *fakeLED) last() color.RGBA {
@@ -168,5 +170,21 @@ func TestBrightnessZeroTurnsTheLEDOff(t *testing.T) {
 
 	if led.last() != (color.RGBA{}) {
 		t.Errorf("color %v, want dark", led.last())
+	}
+}
+
+func TestWriteErrorsAreIgnored(t *testing.T) {
+	led := &fakeLED{err: io.ErrClosedPipe}
+	light := status.NewLight(led, start)
+
+	light.Show(status.Busy, start)
+	light.SetBrightness(100)
+	light.Tick(start.Add(status.Busy.Hold()))
+
+	if light.State() != status.Idle {
+		t.Errorf("state %d, want idle despite a write error", light.State())
+	}
+	if len(led.writes) != 4 {
+		t.Errorf("writes %d, want 4 writes even when the driver reports an error", len(led.writes))
 	}
 }

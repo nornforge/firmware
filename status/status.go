@@ -103,7 +103,9 @@ func (l *Light) Brightness() uint8 {
 }
 
 func (l *Light) write() {
-	l.led.WriteColors([]color.RGBA{Scale(l.state.Color(), l.brightness)})
+	// LED write failures are best-effort only: they do not change the firmware
+	// state, and the status package cannot report them to the caller.
+	_ = l.led.WriteColors([]color.RGBA{Scale(l.state.Color(), l.brightness)})
 }
 
 // Tick has to be called regularly. It returns to Idle once the hold time of
