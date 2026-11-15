@@ -47,8 +47,12 @@ the boot button is still held down while reset is released.
 
 Without the reset button, holding the boot button while plugging in the USB cable has the same effect.
 
+If the buttons of the Waveshare board do not work as expected, use the `BOOTSEL` button on the Pico itself:
+unplug the USB cable, hold `BOOTSEL` while plugging it back in, then release it.
+
 Once this firmware runs on the board, no button is needed anymore: `norn boot` from the
-[norn CLI](https://github.com/nornforge/norn) sends it into flash mode.
+[norn CLI](https://github.com/nornforge/norn) sends it into flash mode. The lid of the case can therefore
+be closed after the first flash.
 
 ### 3. Copy the image
 
