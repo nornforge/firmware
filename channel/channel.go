@@ -14,10 +14,13 @@ type Channel struct {
 	index uint
 }
 
-// New returns the channel with the given one-based index driving pin.
+// New returns the channel with the given one-based index driving pin and
+// switches it off, so the state of the pin is known from the start.
 // The pin has to be configured as an output by the caller.
 func New(pin Pin, index uint) *Channel {
-	return &Channel{pin: pin, state: false, index: index}
+	c := &Channel{pin: pin, index: index}
+	c.Set(false)
+	return c
 }
 
 // Toggle inverts the state of the channel.

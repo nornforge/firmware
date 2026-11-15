@@ -29,7 +29,9 @@ func readFromSerial(ch chan<- norn.Command) {
 }
 
 // output configures the pin as an output and returns it as the channel with the given index.
+// The level is set before the pin becomes an output, so the relay does not see a pulse.
 func output(pin machine.Pin, index uint) *channel.Channel {
+	pin.Low()
 	pin.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	return channel.New(pin, index)
 }
