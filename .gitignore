@@ -19,3 +19,6 @@
 
 # Go workspace file
 go.work
+
+# Firmware images produced by tinygo build
+*.uf2
