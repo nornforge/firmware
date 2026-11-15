@@ -56,7 +56,8 @@ wget -q -O "${DL_DIR}/${NORN_TAR}" \
 echo "${NORN_SHA256}  ${DL_DIR}/${NORN_TAR}" | sha256sum -c -
 tar -xzf "${DL_DIR}/${NORN_TAR}" -C "${DL_DIR}" norn
 sudo install -m 0755 "${DL_DIR}/norn" /usr/local/bin/norn
-norn completion bash | sudo tee /etc/bash_completion.d/norn > /dev/null
+/usr/local/bin/norn completion bash > "${DL_DIR}/norn.bash"
+sudo install -m 0644 "${DL_DIR}/norn.bash" /etc/bash_completion.d/norn
 
 rm -rf "${DL_DIR}"
 
