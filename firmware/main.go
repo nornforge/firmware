@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"machine"
 	"os"
+	"time"
 
 	"github.com/nornforge/firmware/channel"
 	"github.com/nornforge/firmware/controller"
@@ -39,10 +40,19 @@ func main() {
 	ctrl := controller.New(Channels, Version, enterBootloader)
 	commands := make(chan norn.Command)
 	go readFromSerial(commands) // make it parallel
+
+	// The watchdog is fed from the command loop: if the loop stops running,
+	// the firmware restarts instead of staying unresponsive.
+	startWatchdog()
+	idle := time.NewTicker(watchdogInterval)
 	for {
-		command := <-commands
-		if res, ok := ctrl.Handle(command); ok {
-			fmt.Print(string(res.Marshal()))
+		select {
+		case command := <-commands:
+			if res, ok := ctrl.Handle(command); ok {
+				fmt.Print(string(res.Marshal()))
+			}
+		case <-idle.C:
 		}
+		feedWatchdog()
 	}
 }

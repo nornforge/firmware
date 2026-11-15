@@ -21,7 +21,3 @@ var (
 		output(machine.GP14, 8),
 	}
 )
-
-func enterBootloader() {
-	machine.EnterBootloader()
-}
