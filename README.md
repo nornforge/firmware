@@ -23,7 +23,7 @@ Download `norn-firmware_pico_<version>.uf2` and `checksums.txt` from the
 [latest release](https://github.com/nornforge/firmware/releases/latest) and check them:
 
 ```sh
-sha256sum --check --ignore-missing checksums.txt
+grep -F "  norn-firmware_pico_<version>.uf2" checksums.txt | sha256sum --check -
 gh attestation verify norn-firmware_pico_<version>.uf2 --repo nornforge/firmware
 ```
 
