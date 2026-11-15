@@ -171,3 +171,26 @@ func TestOtherCommandsDoNotEnterTheBootloader(t *testing.T) {
 		t.Errorf("the bootloader was entered %d times, want never", f.bootloaders)
 	}
 }
+
+func TestUnknownCommandTypeIsRejected(t *testing.T) {
+	for commandType, message := range map[norn.CommandType]string{
+		norn.Nil: "Unknown command type: 0",
+		6:        "Unknown command type: 6",
+		255:      "Unknown command type: 255",
+	} {
+		f := newFixture(8, "")
+		res := f.handle(t, norn.Command{Type: commandType, Channel: 1, Status: true})
+		if res.Success {
+			t.Errorf("type %d: reported success", commandType)
+		}
+		if res.Message != message {
+			t.Errorf("type %d: message %q, want %q", commandType, res.Message, message)
+		}
+		if f.pins[0].writes != 0 {
+			t.Errorf("type %d: a pin was written", commandType)
+		}
+		if f.bootloaders != 0 {
+			t.Errorf("type %d: the bootloader was entered", commandType)
+		}
+	}
+}
