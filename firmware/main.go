@@ -51,6 +51,7 @@ func main() {
 			ch, err := getChannelByIndex(command.Channel, Channels)
 			if err != nil {
 				fmt.Print(norn.MarshalError(err))
+				continue
 			}
 			res := norn.Response{
 				Success: true,
