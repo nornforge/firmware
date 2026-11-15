@@ -3,6 +3,9 @@ set -e
 
 TINY_GO_VERSION="0.44.0"
 
+# The volume holding the GitHub CLI login is created owned by root
+sudo chown -R "$(id -u):$(id -g)" "${HOME}/.config"
+
 # print the Go version
 go version
 
