@@ -13,6 +13,7 @@ Waveshare Pico Relay B. A host talks to it over USB serial using the `norn` prot
 - `controller/` – executes `norn.Command`s on the channels and builds the responses
 - `receiver/` – reads `norn.Command`s from the serial line; discards a frame cut off for longer than 100 ms
 - `status/` – what the RGB status LED shows (states, colors, hold times, brightness)
+- `doc/architecture.md` – architecture with Mermaid diagrams; update it when packages, data flow or the release pipeline change
 - `scripts/build-release.sh` – builds image, SBOM and checksums into `dist/`; used by CI and the release workflow
 - `scripts/check-serial-recovery.sh` – on-device check that the firmware recovers from stray or cut-off input
 - `.devcontainer/` – dev container (Go + TinyGo, versions pinned in `postCreateCommand.sh`)

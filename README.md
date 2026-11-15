@@ -201,6 +201,9 @@ firmware recovers from such input.
 
 ## Development
 
+[doc/architecture.md](doc/architecture.md) describes the packages, the path of a command from the host to
+a relay, the status LED, the relay safety measures and the release pipeline.
+
 The repository comes with a [dev container](.devcontainer/devcontainer.json) that provides Go and TinyGo.
 The code imports TinyGo's `machine` package, so build and test it with `tinygo` rather than plain `go`.
 
