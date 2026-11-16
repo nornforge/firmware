@@ -179,9 +179,12 @@ serial port gets in the way of the next command. Two common sources on Linux:
   modem init string, which starts with `AT`, when it opens the port, unless it is started with `-o`.
 
 With firmware up to v0.1.0 a single stray byte shifts every following frame, and `norn` reports errors until
-enough further bytes happen to restore the alignment. Newer firmware discards incomplete input once no byte
-has arrived for 100 ms, so it is back in sync shortly after the stray bytes. Unplugging the board, or
-restarting it with the reset button, always clears its input.
+enough further bytes happen to restore the alignment. Newer firmware skips stray bytes until the start of
+the next frame, so a command is answered even if stray bytes arrive right before it. It also discards a frame
+that was cut off once no byte has arrived for 100 ms. A command sent within those 100 ms is still answered,
+but the cut-off frame gets an error response first, which `norn` reports as the result of the command;
+sending the command again works. Unplugging the board, or restarting it with the reset button, always
+clears its input.
 
 To keep ModemManager away from the board, tell it to ignore the Pico's USB ID (`2e8a:000a`) with a udev
 rule, for example in `/etc/udev/rules.d/99-norn-firmware.rules`:
