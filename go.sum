@@ -1,5 +1,5 @@
-github.com/nornforge/norn v0.2.0 h1:2zOJU19RGlk1L3u19w+7yeOVn7c3fVEdD5oeVFCd0Ns=
-github.com/nornforge/norn v0.2.0/go.mod h1:9SFIIZCUwqAs0I0deL1u/l3jQ4C1yMqbL9oL/Rd1OZU=
+github.com/nornforge/norn v0.3.0 h1:NClNAF4+sm0pYFQnus7NwPh4WAUMyotmxGwKg65iv9s=
+github.com/nornforge/norn v0.3.0/go.mod h1:eiXVQRYavIKHErcIo3LZwidjdSNY1SZ2uF7m4p45A5o=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 github.com/tinygo-org/pio v0.3.0 h1:opEnOtw58KGB4RJD3/n/Rd0/djYGX3DeJiXLI6y/yDI=

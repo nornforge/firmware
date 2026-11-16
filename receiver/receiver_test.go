@@ -147,3 +147,43 @@ func TestInvalidFrameIsAParseError(t *testing.T) {
 		t.Fatalf("Next() = %v, want a parse error", err)
 	}
 }
+
+// The parser of norn v0.3.0 skips bytes before the marker, so stray bytes do
+// not need a pause before the next command to be discarded.
+func TestStrayBytesDirectlyBeforeFrame(t *testing.T) {
+	for _, stray := range []string{"AT\r", "AT\rAT\rAT\r", "E97", "xxE97E979", "#E979"} {
+		t.Run(stray, func(t *testing.T) {
+			r, _ := newReceiver(chunk{0, stray + frame(norn.Get, 3)})
+			expectCommand(t, r, norn.Get, 3)
+		})
+	}
+}
+
+func TestStrayBytesShortlyBeforeFrame(t *testing.T) {
+	// The pause is shorter than the timeout, so nothing is discarded by it.
+	r, _ := newReceiver(chunk{0, "AT\r"}, chunk{receiver.DefaultTimeout / 2, frame(norn.Version, 0)})
+	expectCommand(t, r, norn.Version, 0)
+}
+
+func TestInvalidFrameDoesNotTakeTheNextOneDown(t *testing.T) {
+	f := []byte(frame(norn.Set, 1))
+	f[len(f)-1] ^= 1 // break the payload checksum
+	r, _ := newReceiver(chunk{0, string(f) + frame(norn.Get, 1)})
+	var c norn.Command
+	if err := r.Next(&c); err == nil || errors.Is(err, receiver.ErrCutOff) {
+		t.Fatalf("Next() = %v, want a parse error", err)
+	}
+	expectCommand(t, r, norn.Get, 1)
+}
+
+func TestCutOffFrameShortlyBeforeFrame(t *testing.T) {
+	// The rest of the cut-off frame never arrives; the next command follows
+	// before the timeout and is taken for the missing bytes at first.
+	f := frame(norn.Set, 2)
+	r, _ := newReceiver(chunk{0, f[:30]}, chunk{receiver.DefaultTimeout / 2, frame(norn.Get, 5)})
+	var c norn.Command
+	if err := r.Next(&c); err == nil || errors.Is(err, receiver.ErrCutOff) {
+		t.Fatalf("Next() = %v, want a parse error", err)
+	}
+	expectCommand(t, r, norn.Get, 5)
+}
